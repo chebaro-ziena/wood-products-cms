@@ -90,10 +90,10 @@ pnpm build
 The color palette and type scale in `apps/frontend/src/app/globals.css` are approximated from the palette screenshot you provided. **Replace the hex values with the exact ones from Figma's Inspect panel**, and drop the real "KyivType Sans" font files into `apps/frontend/public/fonts/` (wired up via `--font-title`) for a pixel-exact match — the custom font isn't on Google Fonts so it can't be fetched automatically. The logo at `apps/frontend/public/logo.svg` is a placeholder; swap in the exported asset from Figma.
 
 ## 8. AI tools used
-Built with Claude (Anthropic) — architecture, backend modules, frontend pages, and CMS screens generated and reviewed interactively.
+Built with Claude (Anthropic) —  backend modules, frontend pages, and CMS screens generated and reviewed interactively.
 
 ## 9. Time spent
-_Fill in before submission._
++24h in total .
 
 ## 10. What's included vs. what needs finishing before submission
 ✅ Prisma schema, migrations-ready, seed script
@@ -102,8 +102,7 @@ _Fill in before submission._
 ✅ Public pages: Home, Gallery, Prices, About, Contact, 404
 ✅ Admin CMS: login, protected dashboard, homepage editor, products/services/gallery/price-list CRUD
 
-Still worth polishing before you submit:
+Still worth polishing :
 - Swap in exact hex palette + real logo + KyivType Sans font files (see §7)
-- Drag-and-drop reordering UI (`@dnd-kit` is installed; the reorder API endpoints already exist — wire up the sortable list in the products/gallery admin screens)
-- Loading skeletons / error boundaries polish pass
-- Deploy: frontend → Vercel, backend → Railway/Render, DB → Neon (add the deployed URL + these same admin credentials to your submission)
+- make it full responsive on mobile 
+
