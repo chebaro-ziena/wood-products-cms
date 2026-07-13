@@ -1,0 +1,52 @@
+services:
+  - type: web
+    name: wood-products-backend
+    runtime: docker
+    dockerfilePath: ./apps/backend/Dockerfile
+    dockerContext: .
+    plan: starter
+    region: oregon
+    healthCheckPath: /api/health
+    preDeployCommand: npx prisma migrate deploy
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      # Paste your Neon (or other) Postgres connection string in the
+      # Render dashboard - never commit real credentials to this file.
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRES_IN
+        value: 15m
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 7d
+      # Update these two after the first deploy if Render assigned a
+      # different subdomain than the service name below (check the
+      # dashboard for the actual *.onrender.com URLs), then redeploy.
+      - key: BACKEND_URL
+        value: https://wood-products-backend.onrender.com
+      - key: FRONTEND_URL
+        value: https://wood-products-frontend.onrender.com
+    disk:
+      name: uploads
+      mountPath: /app/apps/backend/uploads
+      sizeGB: 1
+
+  - type: web
+    name: wood-products-frontend
+    runtime: docker
+    dockerfilePath: ./apps/frontend/Dockerfile
+    dockerContext: .
+    plan: starter
+    region: oregon
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Baked into the client bundle at build time - see note above.
+      - key: NEXT_PUBLIC_API_URL
+        value: https://wood-products-backend.onrender.com

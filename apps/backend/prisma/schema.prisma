@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String
+  name          String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  tokenHash String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// Singleton row (id always "homepage") holding all editable homepage content
+model Homepage {
+  id              String   @id @default("homepage")
+  heroTitle       String   @default("SOLID WOOD PRODUCTS")
+  heroSubtitle    String   @default("")
+  heroImageUrl    String?
+  aboutTitle      String   @default("ABOUT US")
+  aboutText       String   @default("")
+  aboutImageUrl   String? // main (large) box in the About Us image cluster
+  aboutTopImageUrl    String? // small top-right accent box
+  aboutBottomImageUrl String? // small bottom-right accent box
+  advantagesImageUrl String?
+  advantages         String[] @default(["In-house carpentry production", "We only treat wood with environmentally friendly and safe products", "Prices from the manufacturer, no extra charges"])
+  contactTitle    String   @default("ANY QUESTIONS?")
+  contactSubtitle String   @default("")
+  contactPhone    String   @default("+420 000 000 000")
+  contactAddress  String   @default("Na Plzeňce 1166/0, 150 00")
+  updatedAt       DateTime @updatedAt
+
+  banners Banner[]
+
+  @@map("homepage")
+}
+
+model Banner {
+  id         String   @id @default(uuid())
+  title      String?
+  subtitle   String?
+  imageUrl   String?
+  order      Int      @default(0)
+  isActive   Boolean  @default(true)
+  homepageId String   @default("homepage")
+  homepage   Homepage @relation(fields: [homepageId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("banners")
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  imageUrl    String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("services")
+}
+
+model Product {
+  id          String         @id @default(uuid())
+  name        String
+  slug        String         @unique
+  description String?
+  price       Decimal?       @db.Decimal(10, 2)
+  status      ProductStatus  @default(DRAFT)
+  featured    Boolean        @default(false)
+  coverImage  String?
+  order       Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  images      ProductImage[]
+
+  @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+// Standalone gallery (separate from product images, per the "Gallery" page)
+model GalleryImage {
+  id        String   @id @default(uuid())
+  url       String
+  caption   String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("gallery_images")
+}
+
+// Wood-species price category (e.g. "buk pr", "Jasan", "Dub"), each holding
+// a dynamically long list of dimension/price rows.
+model PriceCategory {
+  id        String          @id @default(uuid())
+  name      String
+  order     Int             @default(0)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  items     PriceListItem[]
+
+  @@map("price_categories")
+}
+
+model PriceListItem {
+  id            String        @id @default(uuid())
+  categoryId    String
+  category      PriceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  length        Decimal       @db.Decimal(10, 2) // délka (mm)
+  width         Decimal       @db.Decimal(10, 2) // šířka (mm)
+  thickness     Decimal       @db.Decimal(10, 2) // tloušťka (mm)
+  pricePerM3    Decimal       @db.Decimal(10, 2) // cena m3
+  pricePerPiece Decimal       @db.Decimal(10, 2) // cena ks. (entered manually by admin)
+  order         Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([categoryId])
+  @@map("price_list_items")
+}
+
+model ContactSubmission {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String
+  question  String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("contact_submissions")
+}

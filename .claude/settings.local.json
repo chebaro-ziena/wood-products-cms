@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command 'Get-Process node -ErrorAction SilentlyContinue | Where-Object { $_.Path -like '\\\\''*wood-products-cms*'\\\\'' -or \\(Get-CimInstance Win32_Process -Filter \"ProcessId=$\\($_.Id\\)\"\\).CommandLine -like '\\\\''*next*dev*'\\\\'' } | Select-Object Id, ProcessName')",
+      "Read(//tmp/**)"
+    ]
+  }
+}
